@@ -102,19 +102,19 @@ class Pokeparty:
         }
     ]
 
-    def __init__():
-        pass
-
     def check_player_poke_status(status):
-        status_string = format(status, '08b')
+        status_string = format(status[0], '08b')
         reversed_string = status_string[::-1]
-        ic(status_string, reversed_string)
+        ic(status_string)
         #pokemon can only have 1 status at a time. bits 0-2 are sleep counter, all others are statuses.
-        status_index = reversed_string.index('1')
-        if status_index <= 2:
-            Pokeparty.active_player_pokemon['status'] = f'Asleep for {status_index} more turn(s).'
+        if '1' in reversed_string:
+            status_index = reversed_string.index('1')
+            if status_index <= 2:
+                Pokeparty.active_player_pokemon['status'] = f'Asleep for {status_index} more turn(s).'
+            else:
+                Pokeparty.active_player_pokemon['status'] = Pokeparty.statuses[status_index]
         else:
-            Pokeparty.active_player_pokemon['status'] = Pokeparty.statuses[status_index]
+            Pokeparty.active_player_pokemon['status'] = 'Normal'
 
     def get_team_info(): #used to get stats out of battle
         for i in range(6):
@@ -138,7 +138,8 @@ class Pokeparty:
                     if x != 'status' and x != 'name':
                         Pokeparty.active_player_pokemon[x] = int.from_bytes((pokehook.read_bytes((pokewram_start + y[0]), y[1])) , byteorder= 'big')
                     elif x == 'status':
-                        Pokeparty.check_player_poke_status(y[0])
+                        ic(pokehook.read_bytes((pokewram_start + y[0]), y[1]))
+                        Pokeparty.check_player_poke_status(pokehook.read_bytes((pokewram_start + y[0]), y[1]))
                     elif x == 'name':
                         #Pokeparty.active_player_pokemon['name'] = str(pokehook.read_bytes(pokewram_start + y[0], y[1]).hex())
                         Pokeparty.active_player_pokemon['name'] = pokemon_info[first_poke]['Name']

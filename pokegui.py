@@ -62,10 +62,11 @@ class PokeGUI:
     def draw_info_window(self, active_pokemon):
         # Update the message based on 'active_pokemon'
         msg = f'''Active Pokemon:\n{active_pokemon['name']}\n\n
-                Level: {active_pokemon['level']}
+                Level: {active_pokemon['level']}\n
+                Status: {active_pokemon['status']}\n
                 Current HP / Max HP: \t{active_pokemon['current_hp']} / {active_pokemon['max_hp']}
-                Attack: {active_pokemon['attack']}\t\tDefense: {active_pokemon['defense']}
-                Speed: {active_pokemon['speed']}\t\tSpecial: {active_pokemon['special']}
+                Attack: {active_pokemon['attack']}\tDefense: {active_pokemon['defense']}
+                Speed: {active_pokemon['speed']}\tSpecial: {active_pokemon['special']}
                 '''
 
         # Update the text in the label
