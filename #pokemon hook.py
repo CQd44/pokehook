@@ -29,7 +29,7 @@ try:
     print('Process id: %s' % pokehook.process_id)
 except Exception as e:
     print(e)
-    eg.msgbox(msg='VisualBoyAdvance process not found. Exiting.', title='Error', ok_button='Okay')
+    print("Visual Boy Advance not running. Exiting.")
     exit()
 
 pattern = bytes.fromhex('C35001CEED6666CC0D') #bytes that are located at the beginning of Pokemon R/B's ROM
@@ -50,13 +50,11 @@ ic(pokehook.read_bytes(pokerom_start + 0x0134, 12).decode('utf-8'))
 first_poke = str(pokehook.read_bytes((pokewram_start + 0X16B), 1).hex())
 ic(pokemon_info[first_poke]['Name'])
 
-
 class Pokeparty:
     
     active_player_pokemon = {}
     POKE_OFFSETS: list[hex] = [0x16B, 0x197, 0x1C3, 0x1EF, 0x21B, 0x247]
-
-    statuses = ['Asleep', 'Asleep', 'Asleep', 'Poisoned', 'Burned', 'Frozen', 'Paralyzed']
+    statuses: list[str] = ['Asleep', 'Asleep', 'Asleep', 'Poisoned', 'Burned', 'Frozen', 'Paralyzed']
 
     stat_offets: list[dict[str: hex, int]] = [
         #stat,   [offset, read length]
@@ -105,7 +103,6 @@ class Pokeparty:
     def check_player_poke_status(status):
         status_string = format(status[0], '08b')
         reversed_string = status_string[::-1]
-        ic(status_string)
         #pokemon can only have 1 status at a time. bits 0-2 are sleep counter, all others are statuses.
         if '1' in reversed_string:
             status_index = reversed_string.index('1')
@@ -129,27 +126,19 @@ class Pokeparty:
 
     def get_battle_info():
         if str(pokehook.read_bytes((pokewram_start + Pokeparty.battle_offsets[0]['pokemon'][0]), 1).hex()) in pokemon_info:
-               # if not active_player_pokemon:
-                #    active_player_pokemon = (pokemon_info[str(pokehook.read_bytes((pokewram_start + Pokeparty.battle_offsets[0]['pokemon'][0]), 1).hex())])
-                #else:
-                Pokeparty.active_player_pokemon['pokemon'] = pokemon_info[str(pokehook.read_bytes((pokewram_start + Pokeparty.battle_offsets[0]['pokemon'][0]), 1).hex())]
-                for x, y in Pokeparty.battle_offsets[0].items():
-                    ic(x, y)
-                    if x != 'status' and x != 'name':
-                        Pokeparty.active_player_pokemon[x] = int.from_bytes((pokehook.read_bytes((pokewram_start + y[0]), y[1])) , byteorder= 'big')
-                    elif x == 'status':
-                        ic(pokehook.read_bytes((pokewram_start + y[0]), y[1]))
-                        Pokeparty.check_player_poke_status(pokehook.read_bytes((pokewram_start + y[0]), y[1]))
-                    elif x == 'name':
-                        #Pokeparty.active_player_pokemon['name'] = str(pokehook.read_bytes(pokewram_start + y[0], y[1]).hex())
-                        Pokeparty.active_player_pokemon['name'] = pokemon_info[first_poke]['Name']
-        ic(Pokeparty.active_player_pokemon)
-
+            Pokeparty.active_player_pokemon['pokemon'] = pokemon_info[str(pokehook.read_bytes((pokewram_start + Pokeparty.battle_offsets[0]['pokemon'][0]), 1).hex())]
+            for x, y in Pokeparty.battle_offsets[0].items():
+                if x != 'status' and x != 'name':
+                    Pokeparty.active_player_pokemon[x] = int.from_bytes((pokehook.read_bytes((pokewram_start + y[0]), y[1])) , byteorder= 'big')
+                elif x == 'status':
+                    Pokeparty.check_player_poke_status(pokehook.read_bytes((pokewram_start + y[0]), y[1]))
+                elif x == 'name':
+                    #Pokeparty.active_player_pokemon['name'] = str(pokehook.read_bytes(pokewram_start + y[0], y[1]).hex())
+                    Pokeparty.active_player_pokemon['name'] = pokemon_info[first_poke]['Name']
 
 if __name__ == '__main__':
     root = pokegui.start_root()
     root.withdraw()
     pokeparty = Pokeparty
     pokegui = pokegui.PokeGUI(root, pokeparty)
-    
     root.mainloop()

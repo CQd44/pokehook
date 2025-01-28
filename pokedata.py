@@ -559,34 +559,3 @@ class Pokedata:
     187: {'hex': 'BB', 'decimal': '187', 'name': 'Vileplume'}
     }
 
-    POKE = [0xD16B, 0xD197, 0xD1C3, 0xD1EF, 0xD21B, 0xD247] # - Pokémon (Again)
-    STATUS = [0xD16F, 0xD19B, 0xD1C7, 0xD1F3, 0xD21F, 0xD24B] # - Status (Poisoned, Paralyzed, etc.)
-    TYPE1 = [0xD170, 0xD19C, 0xD1C8, 0xD1F4, 0xD220, 0xD24C] # - Type 1
-    TYPE2 = [0xD171, 0xD19D, 0xD1C9, 0xD1F5, 0xD221, 0xD24D] # - Type 2
-    LEVEL = [0xD18C, 0xD1B8, 0xD1E4, 0xD210, 0xD23C, 0xD268] # - Level (actual level)
-    MAXHP = [0xD18D, 0xD1B9, 0xD1E5, 0xD211, 0xD23D, 0xD269] # - Max HP if = 01 + 256 to MAXHP2 value
-    CHP = [0xD16C, 0xD198, 0xD1C4, 0xD1F0, 0xD21C, 0xD248] # - Current HP if = 01 + 256
-
-    MOVE1 = [0xD173, 0xD19F, 0xD1CB, 0xD1F7, 0xD223, 0xD24F]
-    MOVE2 = [0xD174, 0xD1A0, 0xD1CC, 0xD1F8, 0xD224, 0xD250]
-    MOVE3 = [0xD175, 0xD1A1, 0xD1CD, 0xD1F9, 0xD225, 0xD251]
-    MOVE4 = [0xD176, 0xD1A2, 0xD1CE, 0xD1FA, 0xD226, 0xD252]
-
-    def pokemon_l(game):
-        pokemon_info = [{"slot": str(i + 1), "name": "", "level": "0", "moves": []} for i in range(6)]
-        for i in range(6):
-            p, l = game.get_memory_value(POKE[i]), game.get_memory_value(LEVEL[i])
-            hex_value = hex(int(p))[2:].upper()
-            matching_pokemon = next((entry for entry in pokemon_data if entry.get('hex') == hex_value), None)
-            if matching_pokemon:
-                pokemon_info[i]["name"] = matching_pokemon["name"]
-                pokemon_info[i]["level"] = str(l)
-                moves_addresses = [MOVE1[i], MOVE2[i], MOVE3[i], MOVE4[i]]
-                pokemon_info[i]["moves"] = []
-                for moves_address in moves_addresses:
-                    move_value = game.get_memory_value(moves_address)
-                    if move_value != 0x00:
-                        move_info = moves_dict.get(move_value, {})
-                        move_name = move_info.get("Move", "")
-                        pokemon_info[i]["moves"].append(move_name)
-        return pokemon_info
